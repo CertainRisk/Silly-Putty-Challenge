@@ -18,7 +18,7 @@ A quick check on [VirusTotal](https://www.virustotal.com/) reveals that our bina
 
 Next, we put our binary under the spotlight with FLOSS, a tool for extracting strings. There are strings galore. It's a lot but I remember what to look for from previous videos in the course so I will do my best!
 
-Amidst the string salad, I spot numerous references to SSH. URLs like [chiark.greenend.org.uk/~sgtatham/putty/](https://chiark.greenend.org.uk/~sgtatham/putty/) and cryptic `%s==NULL in terminal.c` catch my eye. 
+Amidst the string salad, I spot numerous references to SSH. And a suspicious URL I shall not link here and cryptic `%s==NULL in terminal.c` catch my eye. 
 
 ![Floss Str 1](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/569002dd-fceb-41c1-af61-507d20c8bede)
 
