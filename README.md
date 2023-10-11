@@ -1,7 +1,4 @@
-# Silly-Putty-Challenge
-Investigating my first Malware without guided help!
-
-# My First Solo Malware Analysis
+# My First Solo Malware Analysis - Silly-Putty-Challenge
 
 So, here I am, embarking on my first solo malware analysis adventure. Armed with the mighty Cmder, my trusty companion in the world of cybersecurity, I'm on a quest to unravel the secrets hidden within a mysterious binary. But before we dive into the juicy details, let's start with the basics.
 
