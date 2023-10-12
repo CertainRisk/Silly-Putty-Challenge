@@ -56,3 +56,71 @@ But then, I stumble upon ADVAPI32.dll. This one's intriguing; it's filled with R
 ![PEView ADVAPI32](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/1ff91481-8ae1-42ee-8f29-bf3f287fd94d)
 
 This marks the end of my Basic Static Analysis portion of my first solo malware analysis adventure. Stay tuned for more exciting discoveries as we delve deeper into the enigma of this binary. The adventure has only just begun!
+_______________________________________________________________________________________________________________________________________________
+
+# Basic Dynamic Analysis
+- This section had a lot of new lessons that I did not do immediately on my own, some things were familiar but most of this I learned during the challenge explanation as I didn't reach as in depth conclusions initially.
+
+## Initial Detonation
+
+- Upon detonation I noted a blue command window pop up for a second and disappear. 
+- A PuTTY Configuration box also popped up which I later learned is the legitimate part of the program.
+
+![Putty Program Window](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/c4e52e32-786f-473d-bd1a-1d89c4800df8)
+
+
+## Main Payload Identification
+
+The question posed for this part of the challenge was "So what is the main payload initiated at detonation and what tools can you use to identify this?" 
+
+- In Procmon, I set a filter for "Process Name" containing "putty.exe".
+- Lo and behold, my putty shows up in Procmon with a PID of 3356.
+- Now, I set up another filter for "Parent PID" as "3356." It's important to filter off the process name since Putty won't be its own parent process.\
+  
+![Putty Procmon PID](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/d5cb0df3-9cb7-4233-af5a-e166f07e5a1f)
+
+And there it is! Filtering by the PID, we spot a brief appearance of a powershell.exe window. But what's it up to? The whole VM crashed, although it might be more of a VM issue than the malware's doing. The new PID is 9744.
+
+![Huge 1 Line Powershell command](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/99a402e9-922b-46cf-ab81-02c82f92d25d)
+
+
+Here I learned that the powershell window opens a hidden window and a non-interactive one. It's also bypassing the execution policy and creating a new object to handle a GzipStream.
+
+## Converted Base64String
+
+Putting the string in the following format on Remnux allows us to conver the format and place it into a file. Currently we don't know what type of file it is so it's left blank. 
+![Remnux Echo](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/7e580467-24d5-4899-8075-7c69212fc223)
+
+We figure out the file type by the following command. 
+![Remnux File Out](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/d720fb6a-9f8d-4cf5-a45a-9a2779ab63f3)
+
+- Once we do that we go to where the file is located, extract it and open it in a text file.
+
+## Deciphering the Payload
+
+It appears to be a powershell one-liner running a base64-encoded and compressed payload.
+
+![Screenshot of Payload](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/9e6b2ceb-469a-43da-b4f6-3eeaf1703133)
+
+## DNS Query
+
+Now, let's unveil the DNS record queried at detonation. To do this, I launch Wireshark to capture Ethernet traffic on the Flare VM. After exiting all Putty sessions and executing putty.exe again, it's clear that the binary is setting up some remote connection.
+
+![Wireshark Capture](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/fb594c7e-6939-4903-b07e-377d65a413af)
+
+![TCP View 8443](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/c107fb34-81e0-4655-a3d1-b83e61150411)
+
+
+In an attempt to trick the malware, I modify the hosts file so it believes we are the website it's trying to reach.
+
+![Local Hosts Trickery](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/95d2b847-77b1-488e-ab40-313a6108ef34)
+
+
+However, things take an unexpected turn. Unlike the previous scenario, this time the malware's response is a confusing mess.
+
+![Ncat Output](https://github.com/CertainRisk/Silly-Putty-Challenge/assets/141761181/dea4cdef-ee5d-4386-aaa6-9f880b6cddd1)
+
+
+It turns out this specific sample requires a TLS certificate for communication.
+
+In summary, our journey into basic dynamic analysis has unveiled intriguing insights into the initial detonation, payload identification, and an attempt to decipher the mysterious DNS queries. 
